@@ -17,6 +17,7 @@ interface ResultCardProps {
   result: CalculationResult;
   locale: Locale;
   copy: CopyDictionary;
+  animateFromZero?: boolean;
   onTryAnother: () => void;
 }
 
@@ -82,6 +83,7 @@ export function ResultCard({
   result,
   locale,
   copy,
+  animateFromZero = true,
   onTryAnother,
 }: ResultCardProps) {
   const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
@@ -90,9 +92,13 @@ export function ResultCard({
 
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [copiedState, setCopiedState] = useState<"link" | "text" | null>(null);
-  const [displayScore, setDisplayScore] = useState(0);
+  const [displayScore, setDisplayScore] = useState(
+    animateFromZero ? 0 : result.score,
+  );
 
   useEffect(() => {
+    if (!animateFromZero) return;
+
     let rafId = 0;
     const duration = 850;
     const start = performance.now();
@@ -109,7 +115,7 @@ export function ResultCard({
 
     rafId = window.requestAnimationFrame(animate);
     return () => window.cancelAnimationFrame(rafId);
-  }, [result.score]);
+  }, [animateFromZero, result.score]);
 
   const tierStyle = TIER_STYLES[result.tier];
   const tierCopy = copy.tiers[result.tier];

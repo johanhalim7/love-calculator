@@ -7,6 +7,7 @@ import type { CopyDictionary } from "@/lib/i18n";
 interface HeartFillLoaderProps {
   nameA: string;
   nameB: string;
+  targetScore: number;
   durationMs: number;
   copy: CopyDictionary;
 }
@@ -14,6 +15,7 @@ interface HeartFillLoaderProps {
 export function HeartFillLoader({
   nameA,
   nameB,
+  targetScore,
   durationMs,
   copy,
 }: HeartFillLoaderProps) {
@@ -21,6 +23,7 @@ export function HeartFillLoader({
   const clipId = `heart-loader-clip-${rawId}`;
   const gradId = `heart-loader-grad-${rawId}`;
   const [progress, setProgress] = useState(0);
+  const [elapsedRatio, setElapsedRatio] = useState(0);
 
   useEffect(() => {
     let rafId = 0;
@@ -29,9 +32,9 @@ export function HeartFillLoader({
     const tick = (now: number) => {
       const elapsed = now - start;
       const ratio = Math.min(1, elapsed / durationMs);
-      // Ease out slightly so the fill feels organic and lively
-      const eased = 1 - Math.pow(1 - ratio, 2.2);
-      setProgress(Math.round(eased * 100));
+      const eased = 1 - Math.pow(1 - ratio, 2.4);
+      setElapsedRatio(ratio);
+      setProgress(Math.round(eased * targetScore));
       if (ratio < 1) {
         rafId = window.requestAnimationFrame(tick);
       }
@@ -39,13 +42,13 @@ export function HeartFillLoader({
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [durationMs]);
+  }, [durationMs, targetScore]);
 
-  const stepIndex = progress < 35 ? 0 : progress < 75 ? 1 : 2;
+  const stepIndex = elapsedRatio < 0.35 ? 0 : elapsedRatio < 0.75 ? 1 : 2;
   const statusText = copy.form.calculatingSteps[stepIndex];
 
-  // Heart SVG height is 110; liquid surface moves from y=108 (0%) to y=-4 (100%)
-  const liquidTopY = 108 - (progress / 100) * 112;
+  // Heart fills from bottom (104) to top (4) proportional to current progress (0..100)
+  const liquidTopY = 104 - (progress / 100) * 100;
 
   return (
     <section

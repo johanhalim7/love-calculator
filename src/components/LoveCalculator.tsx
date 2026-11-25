@@ -29,8 +29,6 @@ interface LoveCalculatorProps {
   initialLocale?: Locale;
 }
 
-const LOADER_DURATION_MS = 1750;
-
 export function LoveCalculator({
   initialNameA = "",
   initialNameB = "",
@@ -41,10 +39,12 @@ export function LoveCalculator({
   const [nameB, setNameB] = useState<string>(initialNameB);
   const [errorKey, setErrorKey] = useState<ValidationErrorKey | null>(null);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
-  const [pendingPair, setPendingPair] = useState<{
-    nameA: string;
-    nameB: string;
+  const [pendingResult, setPendingResult] = useState<{
+    computed: CalculationResult;
+    durationMs: number;
   } | null>(null);
+  const [animateResultFromZero, setAnimateResultFromZero] =
+    useState<boolean>(true);
   const [result, setResult] = useState<CalculationResult | null>(() => {
     if (!initialNameA || !initialNameB) return null;
     const check = validateNames(initialNameA, initialNameB);
@@ -87,20 +87,10 @@ export function LoveCalculator({
     setNameA(validation.nameA);
     setNameB(validation.nameB);
 
-    const finalizeCalculation = () => {
-      const computed = calculateClassic(validation.nameA, validation.nameB);
-      setResult(computed);
-      setIsCalculating(false);
-      setPendingPair(null);
-      addHistoryEntry({
-        nameA: computed.nameA,
-        nameB: computed.nameB,
-        score: computed.score,
-        tier: computed.tier,
-      });
-    };
+    const computed = calculateClassic(validation.nameA, validation.nameB);
+    const durationMs = 900 + computed.score * 8;
 
-    setPendingPair({ nameA: validation.nameA, nameB: validation.nameB });
+    setPendingResult({ computed, durationMs });
     setIsCalculating(true);
 
     window.requestAnimationFrame(() => {
@@ -110,10 +100,18 @@ export function LoveCalculator({
       });
     });
 
-    timerRef.current = window.setTimeout(
-      finalizeCalculation,
-      LOADER_DURATION_MS,
-    );
+    timerRef.current = window.setTimeout(() => {
+      setAnimateResultFromZero(false);
+      setResult(computed);
+      setIsCalculating(false);
+      setPendingResult(null);
+      addHistoryEntry({
+        nameA: computed.nameA,
+        nameB: computed.nameB,
+        score: computed.score,
+        tier: computed.tier,
+      });
+    }, durationMs + 220);
   };
 
   const handleSwap = () => {
@@ -128,7 +126,7 @@ export function LoveCalculator({
       timerRef.current = null;
     }
     setIsCalculating(false);
-    setPendingPair(null);
+    setPendingResult(null);
     setNameA("");
     setNameB("");
     setErrorKey(null);
@@ -148,6 +146,7 @@ export function LoveCalculator({
     setNameA(entry.nameA);
     setNameB(entry.nameB);
     setErrorKey(null);
+    setAnimateResultFromZero(true);
     setResult(calculateClassic(entry.nameA, entry.nameB));
     window.requestAnimationFrame(() => {
       stageRef.current?.scrollIntoView({
@@ -245,21 +244,23 @@ export function LoveCalculator({
         />
 
         <div ref={stageRef}>
-          {isCalculating && pendingPair ? (
+          {isCalculating && pendingResult ? (
             <HeartFillLoader
-              key={`${pendingPair.nameA}-${pendingPair.nameB}`}
-              nameA={pendingPair.nameA}
-              nameB={pendingPair.nameB}
-              durationMs={LOADER_DURATION_MS}
+              key={`${pendingResult.computed.nameA}-${pendingResult.computed.nameB}-${pendingResult.computed.score}`}
+              nameA={pendingResult.computed.nameA}
+              nameB={pendingResult.computed.nameB}
+              targetScore={pendingResult.computed.score}
+              durationMs={pendingResult.durationMs}
               copy={copy}
             />
           ) : (
             result && (
               <ResultCard
-                key={`${result.nameA}-${result.nameB}-${result.score}`}
+                key={`${result.nameA}-${result.nameB}-${result.score}-${animateResultFromZero}`}
                 result={result}
                 locale={locale}
                 copy={copy}
+                animateFromZero={animateResultFromZero}
                 onTryAnother={handleTryAnother}
               />
             )
