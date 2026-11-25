@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fff7f6;
+  --foreground: #2a121b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, serif;
+}
+
+body {
+  background:
+    radial-gradient(circle at 10% 8%, rgba(251, 113, 133, 0.2), transparent 40%),
+    radial-gradient(circle at 90% 14%, rgba(244, 63, 94, 0.14), transparent 38%),
+    radial-gradient(circle at 50% 92%, rgba(253, 164, 175, 0.22), transparent 46%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.16);
+  }
+  40% {
+    transform: scale(0.98);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes cardEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes waveSlide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes waveSlideReverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes floatSparkle {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.6);
+  }
+  30% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-28px) scale(1.1);
+  }
+}
+
+@keyframes ambientDrift {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-14px) translateX(8px) rotate(6deg);
+  }
+}
+
+@keyframes burstPop {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 0px), var(--ty, -24px)) scale(1.15);
+  }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.1s ease-in-out infinite;
+}
+
+.animate-card-enter {
+  animation: cardEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-wave-slide {
+  animation: waveSlide 1.8s linear infinite;
+}
+
+.animate-wave-slide-reverse {
+  animation: waveSlideReverse 2.4s linear infinite;
+}
+
+.animate-float-sparkle {
+  animation: floatSparkle 1.8s ease-out infinite;
+}
+
+.animate-ambient-drift {
+  animation: ambientDrift 7s ease-in-out infinite;
+}
+
+.animate-burst-pop {
+  animation: burstPop 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ambient-drift {
+    animation: none;
+  }
+}
